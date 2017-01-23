@@ -1,15 +1,12 @@
 package com.example.qqtest;
 
-import android.animation.AnimatorSet;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
 
 import java.util.List;
 
@@ -18,12 +15,20 @@ import java.util.List;
  */
 
 public class MyView extends View{
+    float currentX= 100f;//表情实时运动坐标
+    float currentY= -100f;
+
+    float count = 0.0001f;//下落的加速度
+    float origal = 0.0001f;
+    //float count;
+
     Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image);
 
-    List<Point> pointList;
+    //List<Point> pointList;
     Canvas canvas;
-    //BallThread bt;
-    Point currentPoint;
+
+    Context mContext;
+
     public MyView(Context Activity) {
         this(Activity,null);
 
@@ -34,107 +39,123 @@ public class MyView extends View{
     }
     public MyView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        currentPoint = new Point(-100,-100);
-        //bt = new BallThread();
-
-        //this.setTranslationY(this.getTranslationY()-100);
+        mContext = context;
+        //count = MyUtils.px2dip(mContext,16);
     }
     public void initMovables(final List<Point> pointList){
-        //bt.start();
-        this.pointList = pointList;
-//        Point startPoint = new Point(pointList.get(0).getX(), pointList.get(0).getY());
-//        Point endPoint = new Point(pointList.get(1).getX(), pointList.get(1).getY());
-//        ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), startPoint, endPoint);
-//        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                currentPoint = (Point) animation.getAnimatedValue();
-//                invalidate();
-//            }
-//        });
-//        anim.setInterpolator(new BounceInterpolator());
-//        anim.setDuration(2000);
-//        anim.start();
 
+        Log.d("TAG", pointList.get(1).getX()+" "+pointList.get(2).getX()+" "+pointList.get(3).getX()+"");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                currentX=pointList.get(0).getX();
+                //currentY=pointList.get(0).getY();
+                down(pointList.get(1).getY());
+                up(pointList.get(1).getY()-200);
+                down(pointList.get(1).getY());
+                up(pointList.get(1).getY()-100);
+                down(pointList.get(1).getY());
+                up(pointList.get(1).getY()-50);
+                down(pointList.get(1).getY());
 
+                JumpToRight(pointList.get(3).getY(),200);
+                JumpToRight(pointList.get(3).getY(),100);
+                JumpToRight(pointList.get(3).getY(),50);
 
-        startTanTiao();
+                JumpToLeft(pointList.get(2).getY(),200);
+                JumpToLeft(pointList.get(2).getY(),100);
+                JumpToLeft(pointList.get(2).getY(),50);
 
-//        AnimatorSet animatorSet = new AnimatorSet();
-//        animatorSet.play(animatorSet2).after(anim);
-//        animatorSet.setDuration(2000);
-//        animatorSet.start();
+                up(currentY-100);
+                down(MyUtils.getScreenHeight(mContext)+100);
+
+                currentX= 100f;//表情实时运动坐标
+                currentY= -100f;
+
+                Log.d("TAG", "线程结束！");
+            }
+        }).start();
     }
 
-    private void startTanTiao() {
-//        Point startPoint2 = new Point(pointList.get(1).getX(), pointList.get(1).getY());
-//        Point endPoint2 = new Point(pointList.get(3).getX(), pointList.get(3).getY());
-//        ValueAnimator anim2 = ValueAnimator.ofObject(new PointEvaluator(), startPoint2, endPoint2);
-//        anim2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                currentPoint = (Point) animation.getAnimatedValue();
-//                invalidate();
-//            }
-//        });
-////        anim2.setDuration(2000);
-////        anim2.start();
-//
-//        Point startPoint3 = new Point(pointList.get(1).getX(), pointList.get(1).getY());
-//        Point endPoint3 = new Point(pointList.get(3).getX(), pointList.get(3).getY());
-//        ValueAnimator anim3 = ValueAnimator.ofObject(new PointEvaluator(), startPoint3, endPoint3);
-//        anim3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                currentPoint = (Point) animation.getAnimatedValue();
-//                invalidate();
-//            }
-//        });
-//
-//        AnimatorSet animatorSet2 = new AnimatorSet();
-//        animatorSet2.setDuration(2000);
-//        animatorSet2.play(anim2).with(anim3);
-//        animatorSet2.start();
-
-        Point startPoint3 = new Point(pointList.get(1).getX(), pointList.get(1).getY());
-        int dx = (pointList.get(3).getX()-pointList.get(1).getX())/2+pointList.get(1).getX();
-        Point endPoint3 = new Point(dx, pointList.get(1).getY()-600);
-        ValueAnimator anim3 = ValueAnimator.ofObject(new PointEvaluator(), startPoint3, endPoint3);
-        anim3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                currentPoint = (Point) animation.getAnimatedValue();
-                invalidate();
-            }
-        });
-        anim3.setInterpolator(new DecelerateInterpolator());
-        anim3.setDuration(1000);
-//        anim3.start();
-
-        Point startPoint = new Point(dx, pointList.get(1).getY()-600);
-        Point endPoint = new Point(pointList.get(3).getX(), pointList.get(3).getY());
-        //Point endPoint = new Point(dx, pointList.get(3).getY());
-        ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), startPoint, endPoint);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                currentPoint = (Point) animation.getAnimatedValue();
-                invalidate();
-            }
-        });
-        anim.setInterpolator(new BounceInterpolator());
-        anim.setDuration(3000);
-
-        AnimatorSet animatorSet2 = new AnimatorSet();
-        //animatorSet2.setDuration(1500);
-        animatorSet2.play(anim).after(anim3);
-        animatorSet2.start();
+    public void down(float y){
+        while (currentY<y){
+            float b = 0.1f+count;
+            currentY += b;
+            count+=0.0001;
+            //offsetTopAndBottom((int) b);
+            postInvalidate();
+        }
+        count = origal;
     }
+
+    public void up(float y){
+        while (y<currentY){
+            float b = 0.1f+count;
+            currentY-=b;
+            count+=0.0001;
+            postInvalidate();
+        }
+        count = origal;
+    }
+
+    public void JumpToRight(float y,int jump){
+//        float avaX = (x-currentX)/2+currentX;
+//        float dy = (y-currentY);
+        float y2 = currentY-jump;
+        while (currentY>y2){
+            float b = 0.1f;
+            currentX+=b;
+
+            float b2 = 0.1f+count;
+            currentY-=b2;
+            count+=0.0001;
+
+            postInvalidate();
+        }
+        count = origal;
+        while (currentY<y){
+            float b = 0.1f;
+            currentX+=b;
+
+            float b2 = 0.1f+count;
+            currentY += b2;
+            count+=0.0001;
+            postInvalidate();
+        }
+        count = origal;
+    }
+
+    public void JumpToLeft(float y,int jump){
+//        float avaX = (x-currentX)/2+currentX;
+//        float dy = (y-currentY);
+        float y2 = currentY-jump;
+        while (currentY>y2){
+            float b = 0.1f;
+            currentX-=b;
+
+            float b2 = 0.1f+count;
+            currentY-=b2;
+            count+=0.0001;
+
+            postInvalidate();
+        }
+        count = origal;
+        while (currentY<y){
+            float b = 0.1f;
+            currentX-=b;
+
+            float b2 = 0.1f+count;
+            currentY += b2;
+            count+=0.0001;
+            postInvalidate();
+        }
+        count = origal;
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
         this.canvas = canvas;
-        canvas.drawBitmap(bitmap, currentPoint.getX(), currentPoint.getY(), null);
+        canvas.drawBitmap(bitmap, currentX, currentY, null);
     }
-
 }
